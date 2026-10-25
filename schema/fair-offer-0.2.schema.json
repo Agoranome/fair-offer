@@ -1,0 +1,153 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agoranome.com/standard/fair-offer-0.2.schema.json",
+  "title": "Fair Offer block",
+  "description": "The info of the x402 extension \"fair-offer\": which Fair Offer Standard rules an offer keeps, and where a buyer can check each. It must be identical in the unpaid 402 and on the paid retry, so it holds no live counts or timestamps. Buyers may add accept_proof when they echo it.",
+  "type": "object",
+  "required": [
+    "version",
+    "settlement",
+    "listing_price_matches_offer",
+    "data_not_instructions"
+  ],
+  "properties": {
+    "version": {
+      "const": "0.2"
+    },
+    "standard": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "description": "An https URL, or a path relative to the resource URL."
+    },
+    "settlement": {
+      "description": "FO-2: what happens to a call that fails, and who enforces it. 'seller' means the seller's server doesn't settle a failed call; 'rail' means the payment scheme itself only captures on a successful response (x402 auth-capture).",
+      "type": "object",
+      "required": [
+        "failed_calls",
+        "enforced_by"
+      ],
+      "properties": {
+        "failed_calls": {
+          "const": "not_charged"
+        },
+        "enforced_by": {
+          "enum": [
+            "seller",
+            "rail"
+          ]
+        },
+        "capture_on": {
+          "const": "2xx"
+        }
+      },
+      "if": {
+        "properties": {
+          "enforced_by": {
+            "const": "rail"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "capture_on"
+        ]
+      }
+    },
+    "receipts": {
+      "description": "FO-3: every paid result carries a receipt signed by the seller.",
+      "type": "object",
+      "required": [
+        "signed"
+      ],
+      "properties": {
+        "signed": {
+          "const": true
+        },
+        "signer": {
+          "type": "string",
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        },
+        "verify": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "An https URL, or a path relative to the resource URL."
+        },
+        "public": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "An https URL, or a path relative to the resource URL."
+        }
+      }
+    },
+    "sample": {
+      "description": "FO-4: a free sample of what the paid route returns, on the same host.",
+      "type": "object",
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "An https URL, or a path relative to the resource URL."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "attested_by": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "An https URL, or a path relative to the resource URL."
+        }
+      }
+    },
+    "listing_price_matches_offer": {
+      "description": "FO-5: the price in the seller's listing is the price in this 402.",
+      "type": "boolean"
+    },
+    "data_not_instructions": {
+      "description": "FO-6: responses carry data for the buyer, never instructions aimed at it.",
+      "type": "boolean"
+    },
+    "pledge": {
+      "description": "FO-7: a promise about where revenue goes, with a public ledger.",
+      "type": "object",
+      "required": [
+        "share",
+        "basis",
+        "ledger"
+      ],
+      "properties": {
+        "share": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "basis": {
+          "enum": [
+            "settled_revenue",
+            "gross_revenue",
+            "profit"
+          ]
+        },
+        "ledger": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "An https URL, or a path relative to the resource URL."
+        }
+      }
+    },
+    "accept_proof": {
+      "type": "string",
+      "maxLength": 512,
+      "description": "Added by a buyer to the block it echoes: its requirements."
+    }
+  }
+}

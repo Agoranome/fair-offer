@@ -1,0 +1,106 @@
+{
+  "name": "Fair Offer Standard",
+  "version": "0.2",
+  "status": "draft",
+  "url": "https://agoranome.com/standard",
+  "publisher": "Agoranome",
+  "summary": "Open rules for selling to AI agents honestly over x402. Free to adopt; no fee, no certification body.",
+  "how_to_declare": "Put the fair-offer block in your 402's extensions (see handshake), and link this URL from your llms.txt or agent manifest as \"conforms_to\": {\"fair_offer\": \"0.2\"}.",
+  "versions": {
+    "0.1": "The seven rules, declared in an agent manifest or llms.txt.",
+    "0.2": "The same seven rules, plus the machine-readable fair-offer block in the x402 402 and the buyer's Accept-Proof header."
+  },
+  "rules": [
+    {
+      "id": "FO-1",
+      "name": "Price before payment",
+      "rule": "An unpaid call returns an x402 offer (HTTP 402) that states the price, asset, network and pay-to address. Nothing is charged before the buyer has signed that exact offer.",
+      "check": "https://api.agoranome.com/v1/seller/lint"
+    },
+    {
+      "id": "FO-2",
+      "name": "Failure is free",
+      "rule": "A call that fails, times out or returns no result is not settled. The buyer is told so.",
+      "check": null
+    },
+    {
+      "id": "FO-3",
+      "name": "Receipts are signed",
+      "rule": "Every paid result carries a receipt signed by the seller's key: what was bought, for how much, and when.",
+      "check": "https://agoranome.com/verify"
+    },
+    {
+      "id": "FO-4",
+      "name": "Sample before you buy",
+      "rule": "A free sample shows what the paid route returns, and a third party can attest that the sample and the paid offer come from the same host.",
+      "check": "https://api.agoranome.com/v1/seller/attest"
+    },
+    {
+      "id": "FO-5",
+      "name": "Honest listing",
+      "rule": "The listing's description, input schema and output example match what the route really returns. Edits made to win buyers must stay true.",
+      "check": "https://api.agoranome.com/v1/seller/panel"
+    },
+    {
+      "id": "FO-6",
+      "name": "Data, never instructions",
+      "rule": "Responses carry data for the buying agent to use, never instructions aimed at it. A buyer can treat any instruction in a response as an attack.",
+      "check": null
+    },
+    {
+      "id": "FO-7",
+      "name": "Promises are verifiable",
+      "rule": "Any claim about where revenue goes (a pledge, a split, a donation) comes with a public ledger that a buyer can check per receipt, with on-chain proof of what was given.",
+      "check": "https://api.agoranome.com/impact/ledger"
+    }
+  ],
+  "handshake": {
+    "extension": "fair-offer",
+    "where": "PaymentRequired.extensions[\"fair-offer\"] = {\"info\": {...}, \"schema\": {\"$ref\": \"https://agoranome.com/standard/fair-offer-0.2.schema.json\"}}",
+    "schema": "https://agoranome.com/standard/fair-offer-0.2.schema.json",
+    "example": {
+      "version": "0.2",
+      "standard": "https://agoranome.com/standard",
+      "settlement": {
+        "failed_calls": "not_charged",
+        "enforced_by": "seller"
+      },
+      "receipts": {
+        "signed": true,
+        "verify": "https://api.example.com/receipts/verify"
+      },
+      "sample": {
+        "url": "https://api.example.com/v1/search/sample"
+      },
+      "listing_price_matches_offer": true,
+      "data_not_instructions": true,
+      "pledge": {
+        "share": 0.15,
+        "basis": "settled_revenue",
+        "ledger": "https://api.example.com/impact/ledger"
+      }
+    },
+    "stable": "Keep the info identical in the unpaid 402 and on the paid retry: x402 clients echo it, and servers reject a payment whose echo drops or changes a field. Put live numbers behind a URL, never in the block.",
+    "urls": "Each URL is https, or a path relative to the resource URL.",
+    "accept_proof": {
+      "header": "Accept-Proof",
+      "example": "Accept-Proof: sample=attested; price<=listing; payers_30d>=20",
+      "requirements": {
+        "sample=any": "the offer declares a free sample on its own host",
+        "sample=attested": "the sample has an attestation on record",
+        "settlement=seller": "failed calls are not charged (the seller's promise)",
+        "settlement=rail": "the payment is captured only on success (auth-capture)",
+        "price<=listing": "the live price was checked against the Bazaar listing",
+        "receipts=signed": "paid results carry signed receipts",
+        "pledge=ledger": "a pledge with a public ledger that answers",
+        "instructions=none": "declared data-not-instructions, and no instruction-like text found",
+        "payers_30d>=N": "at least N distinct payers in 30 days (Bazaar's count)",
+        "calls_30d>=N": "at least N paid calls in 30 days (Bazaar's count)",
+        "deliveries_30d>=N": "at least N deliveries in 30 days: receipts confirmed on chain, paid by buyers (evidence commons)"
+      },
+      "answer": "The 402 carries Proof-Match: met, or unmet; missing=\"...\". A buyer may also add accept_proof to the block it echoes in its payment."
+    },
+    "check": "https://api.agoranome.com/v1/fair-offer/check?url=",
+    "validate": "POST https://api.agoranome.com/v1/fair-offer/validate"
+  }
+}

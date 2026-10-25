@@ -1,0 +1,22 @@
+{
+  "version": "0.2",
+  "standard": "https://agoranome.com/standard",
+  "settlement": {
+    "failed_calls": "not_charged",
+    "enforced_by": "seller"
+  },
+  "receipts": {
+    "signed": true,
+    "verify": "https://api.example.com/receipts/verify"
+  },
+  "sample": {
+    "url": "https://api.example.com/v1/search/sample"
+  },
+  "listing_price_matches_offer": true,
+  "data_not_instructions": true,
+  "pledge": {
+    "share": 0.15,
+    "basis": "settled_revenue",
+    "ledger": "https://api.example.com/impact/ledger"
+  }
+}
