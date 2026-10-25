@@ -1,0 +1,28 @@
+# Publishes Agoranome's entry in the official MCP Registry
+# (io.github.Agoranome/agoranome). The registry accepts an org namespace only
+# from that org's GitHub Actions (OIDC), so the publish runs here. Run it by hand
+# (Actions -> Publish to MCP Registry -> Run workflow) after registry/server.json
+# changes; the file is generated from Agoranome's config with `server-json`.
+name: Publish to MCP Registry
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install mcp-publisher v1.8.4
+        run: |
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/download/v1.8.4/mcp-publisher_linux_amd64.tar.gz" | tar xz mcp-publisher
+          ./mcp-publisher --version || true
+      - name: Log in with GitHub OIDC
+        run: ./mcp-publisher login github-oidc
+      - name: Publish
+        working-directory: registry
+        run: ../mcp-publisher publish
