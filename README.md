@@ -92,7 +92,8 @@ Accept-Proof: sample=attested; price<=listing; payers_30d>=20
 ## Proposing changes
 
 Open an issue or a pull request. Changes to the block's fields go into a new
-version, so a buyer's policy written for 0.2 keeps working.
+version, so a buyer's policy written for 0.2 keeps working. Corrections, data
+questions and replication requests can also go to research@agoranome.com.
 
 ## Versions
 
