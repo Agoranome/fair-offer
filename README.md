@@ -89,6 +89,16 @@ Accept-Proof: sample=attested; price<=listing; payers_30d>=20
   public; this repository holds the open standard.
 - Using it in your 402s? Open an issue with your host and it can be listed here.
 
+## Agent skill for buyers
+
+[`skills/x402-pay-safely/SKILL.md`](skills/x402-pay-safely/SKILL.md) is an
+[Agent Skill](https://agentskills.io) for any agent with a wallet. It tells the
+agent when to check an x402 seller before paying it and how to prove a payment
+after, using Agoranome's paid Buyer check ($0.01 a call, up to 20 offers at once)
+and the free checks above. Skill installers that read a GitHub repository can
+install it from here. The copy served at
+<https://api.agoranome.com/skills/x402-pay-safely/SKILL.md> is always current.
+
 ## Proposing changes
 
 Open an issue or a pull request. Changes to the block's fields go into a new
@@ -102,6 +112,6 @@ questions and replication requests can also go to research@agoranome.com.
 
 ## License
 
-The standard text, schema and examples are licensed under
+The standard text, schema, examples and the buyer skill are licensed under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Implement it freely;
 credit "The Fair Offer Standard, Agoranome".
