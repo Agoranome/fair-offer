@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fair Offer pledge ledger",
+  "description": "A seller's pledge and, month by month, what it can be checked against: the Merkle root of every receipt settled in the month, the basis, the share, the recipient and the donation transactions on Base. A month is checked once grace_days have passed after it ends: the USDC transfers to the recipient from the month's start to then must add up to at least share x basis.",
+  "type": "object",
+  "required": [
+    "kind",
+    "terms",
+    "proof",
+    "months"
+  ],
+  "properties": {
+    "kind": {
+      "const": "fair-offer.pledge-ledger/1"
+    },
+    "terms": {
+      "type": "object",
+      "required": [
+        "share",
+        "basis"
+      ],
+      "properties": {
+        "share": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "basis": {
+          "type": "string"
+        },
+        "recipient": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^0x[0-9a-fA-F]{40}$"
+        }
+      }
+    },
+    "proof": {
+      "type": "string",
+      "description": "A URL with {receipt_id} that answers the receipt's entry {receipt_id, payer, amount_atomic, tx_hash}, its leaf, its proof (sibling hashes) and its month's merkle_root"
+    },
+    "leaf": {
+      "const": "sha256(0x00 || canonical_json({receipt_id, payer, amount_atomic, tx_hash}))"
+    },
+    "node": {
+      "const": "sha256(0x01 || min(a, b) || max(a, b)); leaves sorted, an odd node carried up unchanged"
+    },
+    "grace_days": {
+      "const": 45
+    },
+    "months": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "period",
+          "merkle_root"
+        ],
+        "properties": {
+          "period": {
+            "type": "string",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+          },
+          "merkle_root": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^0x[0-9a-fA-F]{64}$"
+          },
+          "receipts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "basis_atomic": {
+            "type": "string",
+            "pattern": "^\\d+$"
+          },
+          "share": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "maximum": 1
+          },
+          "recipient": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^0x[0-9a-fA-F]{40}$"
+          },
+          "donations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^0x[0-9a-fA-F]{64}$"
+            }
+          },
+          "receipt_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$id": "https://agoranome.com/standard/pledge-ledger-0.1.schema.json"
+}

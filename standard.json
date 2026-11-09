@@ -1,14 +1,15 @@
 {
   "name": "Fair Offer Standard",
-  "version": "0.2",
+  "version": "0.3",
   "status": "draft",
   "url": "https://agoranome.com/standard",
   "publisher": "Agoranome",
   "summary": "Open rules for selling to AI agents honestly over x402. Free to adopt; no fee, no certification body.",
-  "how_to_declare": "Put the fair-offer block in your 402's extensions (see handshake), and link this URL from your llms.txt or agent manifest as \"conforms_to\": {\"fair_offer\": \"0.2\"}.",
+  "how_to_declare": "Put the fair-offer block in your 402's extensions (see handshake), and link this URL from your llms.txt or agent manifest as \"conforms_to\": {\"fair_offer\": \"0.3\"}.",
   "versions": {
     "0.1": "The seven rules, declared in an agent manifest or llms.txt.",
-    "0.2": "The same seven rules, plus the machine-readable fair-offer block in the x402 402 and the buyer's Accept-Proof header."
+    "0.2": "The same seven rules, plus the machine-readable fair-offer block in the x402 402 and the buyer's Accept-Proof header.",
+    "0.3": "Eight rules: FO-8, the same offer to every buyer, declared as one_offer in the block and asked for with Accept-Proof one_offer=checked; the pledge-ledger schema FO-7's ledgers can follow; and the platform annex, six rules for directories that list sellers. 0.2 blocks stay valid."
   },
   "rules": [
     {
@@ -52,14 +53,61 @@
       "name": "Promises are verifiable",
       "rule": "Any claim about where revenue goes (a pledge, a split, a donation) comes with a public ledger that a buyer can check per receipt, with on-chain proof of what was given.",
       "check": "https://api.agoranome.com/impact/ledger"
+    },
+    {
+      "id": "FO-8",
+      "name": "Same offer to every buyer",
+      "rule": "Every buyer that asks at the same moment gets the same offer: the same price, asset, network and pay-to, whatever client, user agent or headers it sends. A price may change over time, never by who is asking.",
+      "check": "https://api.agoranome.com/v1/fair-offer/check?url="
     }
   ],
+  "annex": {
+    "platforms": {
+      "summary": "Rules for directories, indexes and marketplaces that list x402 sellers, so an agent searching one can trust the order it is shown. Free to adopt, like the rules above.",
+      "rules": [
+        {
+          "id": "P-1",
+          "name": "No paid placement",
+          "rule": "No paid placement: rank can't be bought, and anything sponsored says so."
+        },
+        {
+          "id": "P-2",
+          "name": "A published rank rule",
+          "rule": "A published rank rule: the signals that order results are stated, and rank follows them."
+        },
+        {
+          "id": "P-3",
+          "name": "Sweeps aren't payers",
+          "rule": "Catalog sweeps aren't counted as payers."
+        },
+        {
+          "id": "P-4",
+          "name": "Removal with notice",
+          "rule": "A listing is removed only with notice and a reason."
+        },
+        {
+          "id": "P-5",
+          "name": "Extensions kept",
+          "rule": "A listing's x402 extensions, the Fair Offer block among them, are kept as sent."
+        },
+        {
+          "id": "P-6",
+          "name": "Fresh listings",
+          "rule": "Listings are kept fresh: a stale one is marked or dropped."
+        }
+      ]
+    }
+  },
+  "pledge_ledger": {
+    "schema": "https://agoranome.com/standard/pledge-ledger-0.1.schema.json",
+    "for": "FO-7: a ledger any buyer can check per receipt, with on-chain proof"
+  },
   "handshake": {
     "extension": "fair-offer",
-    "where": "PaymentRequired.extensions[\"fair-offer\"] = {\"info\": {...}, \"schema\": {\"$ref\": \"https://agoranome.com/standard/fair-offer-0.2.schema.json\"}}",
-    "schema": "https://agoranome.com/standard/fair-offer-0.2.schema.json",
+    "where": "PaymentRequired.extensions[\"fair-offer\"] = {\"info\": {...}, \"schema\": {\"$ref\": \"https://agoranome.com/standard/fair-offer-0.3.schema.json\"}}",
+    "schema": "https://agoranome.com/standard/fair-offer-0.3.schema.json",
     "example": {
-      "version": "0.2",
+      "version": "0.3",
       "standard": "https://agoranome.com/standard",
       "settlement": {
         "failed_calls": "not_charged",
@@ -74,6 +122,7 @@
       },
       "listing_price_matches_offer": true,
       "data_not_instructions": true,
+      "one_offer": true,
       "pledge": {
         "share": 0.15,
         "basis": "settled_revenue",
@@ -96,7 +145,8 @@
         "instructions=none": "declared data-not-instructions, and no instruction-like text found",
         "payers_30d>=N": "at least N distinct payers in 30 days (Bazaar's count)",
         "calls_30d>=N": "at least N paid calls in 30 days (Bazaar's count)",
-        "deliveries_30d>=N": "at least N deliveries in 30 days: receipts confirmed on chain, paid by buyers (evidence commons)"
+        "deliveries_30d>=N": "at least N deliveries in 30 days: receipts confirmed on chain, paid by buyers (evidence commons)",
+        "one_offer=checked": "declared one_offer, and the offer read under two x402 client profiles seconds apart was the same, with no difference confirmed in 30 days (0.3)"
       },
       "answer": "The 402 carries Proof-Match: met, or unmet; missing=\"...\". A buyer may also add accept_proof to the block it echoes in its payment."
     },
