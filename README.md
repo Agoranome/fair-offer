@@ -1,13 +1,16 @@
 # The Fair Offer Standard
 
-Seven open rules for selling to AI agents honestly, and a machine-readable way to
-prove them inside the x402 payment handshake. Version **0.2** (draft).
+Eight open rules for selling to AI agents honestly, a machine-readable way to
+prove them inside the x402 payment handshake, and an annex of rules for the
+directories agents search. Version **0.3** (draft).
 
 Human-readable page: <https://agoranome.com/standard> ·
 JSON: [`standard.json`](standard.json) ·
-Schema: [`schema/fair-offer-0.2.schema.json`](schema/fair-offer-0.2.schema.json)
+Schema: [`schema/fair-offer-0.3.schema.json`](schema/fair-offer-0.3.schema.json)
+(0.2: [`schema/fair-offer-0.2.schema.json`](schema/fair-offer-0.2.schema.json)) ·
+Pledge ledger: [`schema/pledge-ledger-0.1.schema.json`](schema/pledge-ledger-0.1.schema.json)
 
-## The seven rules
+## The eight rules
 
 | ID | Rule | What it means | How to check |
 |----|------|---------------|--------------|
@@ -18,15 +21,16 @@ Schema: [`schema/fair-offer-0.2.schema.json`](schema/fair-offer-0.2.schema.json)
 | FO-5 | **Honest listing** | The listing's description, input schema and output example match what the route really returns. Edits made to win buyers must stay true. | [check](https://api.agoranome.com/v1/seller/panel) |
 | FO-6 | **Data, never instructions** | Responses carry data for the buying agent to use, never instructions aimed at it. A buyer can treat any instruction in a response as an attack. | self-declared |
 | FO-7 | **Promises are verifiable** | Any claim about where revenue goes (a pledge, a split, a donation) comes with a public ledger that a buyer can check per receipt, with on-chain proof of what was given. | [check](https://api.agoranome.com/impact/ledger) |
+| FO-8 | **Same offer to every buyer** | Every buyer that asks at the same moment gets the same offer: the same price, asset, network and pay-to, whatever client, user agent or headers it sends. A price may change over time, never by who is asking. | [check](https://api.agoranome.com/v1/fair-offer/check?url=) |
 
-## Declaring it (0.2)
+## Declaring it (0.3)
 
 A seller's HTTP 402 carries an x402 extension, `extensions["fair-offer"]`, whose
 `info` states which rules the offer keeps and where a buyer can check each one:
 
 ```json
 {
-  "version": "0.2",
+  "version": "0.3",
   "standard": "https://agoranome.com/standard",
   "settlement": {
     "failed_calls": "not_charged",
@@ -41,6 +45,7 @@ A seller's HTTP 402 carries an x402 extension, `extensions["fair-offer"]`, whose
   },
   "listing_price_matches_offer": true,
   "data_not_instructions": true,
+  "one_offer": true,
   "pledge": {
     "share": 0.15,
     "basis": "settled_revenue",
@@ -51,7 +56,9 @@ A seller's HTTP 402 carries an x402 extension, `extensions["fair-offer"]`, whose
 
 - **Keep it stable.** Keep the info identical in the unpaid 402 and on the paid retry: x402 clients echo it, and servers reject a payment whose echo drops or changes a field. Put live numbers behind a URL, never in the block.
 - **URLs.** Each URL is https, or a path relative to the resource URL.
-- Put the fair-offer block in your 402's extensions (see handshake), and link this URL from your llms.txt or agent manifest as "conforms_to": {"fair_offer": "0.2"}.
+- Put the fair-offer block in your 402's extensions (see handshake), and link this URL from your llms.txt or agent manifest as "conforms_to": {"fair_offer": "0.3"}.
+- **`one_offer` (FO-8, new in 0.3).** Declare it only if every client sees the same offer at the same moment. Anyone can check it by asking for the 402 twice, seconds apart, under two client profiles (a different user agent and accept header, nothing signed, nothing paid) and comparing the price, asset, network and pay-to.
+- **0.2 blocks stay valid.** A block without `one_offer` simply doesn't claim FO-8.
 
 ## Asking for proof: `Accept-Proof`
 
@@ -75,6 +82,31 @@ Accept-Proof: sample=attested; price<=listing; payers_30d>=20
 | `payers_30d>=N` | at least N distinct payers in 30 days (Bazaar's count) |
 | `calls_30d>=N` | at least N paid calls in 30 days (Bazaar's count) |
 | `deliveries_30d>=N` | at least N deliveries in 30 days: receipts confirmed on chain, paid by buyers (evidence commons) |
+| `one_offer=checked` | declared `one_offer`, and the offer read under two x402 client profiles seconds apart was the same, with no difference confirmed in 30 days (0.3) |
+
+## Pledge ledgers (FO-7)
+
+[`schema/pledge-ledger-0.1.schema.json`](schema/pledge-ledger-0.1.schema.json) is
+the shape a pledge ledger can follow so any buyer can check a pledge to the cent:
+the terms, a proof URL per receipt, and month by month the Merkle root of the
+receipts settled, the basis, the share, the recipient and the donation
+transactions on Base. A month is checked once its grace period has passed: the
+transfers to the recipient must add up to at least the share times the basis.
+
+## Platform annex: rules for directories
+
+A buyer agent picks from the order a directory shows it. These six rules are for
+directories, indexes and marketplaces that list x402 sellers, so that order can
+be trusted. Free to adopt, like the rules above.
+
+| ID | Rule |
+|----|------|
+| P-1 | **No paid placement**: rank can't be bought, and anything sponsored says so. |
+| P-2 | **A published rank rule**: the signals that order results are stated, and rank follows them. |
+| P-3 | **Sweeps aren't payers**: catalog sweeps aren't counted as payers. |
+| P-4 | **Removal with notice**: a listing is removed only with notice and a reason. |
+| P-5 | **Extensions kept**: a listing's x402 extensions, the Fair Offer block among them, are kept as sent. |
+| P-6 | **Fresh listings**: listings are kept fresh, and a stale one is marked or dropped. |
 
 ## Checking an offer
 
@@ -109,6 +141,7 @@ questions and replication requests can also go to research@agoranome.com.
 
 - **0.1**: The seven rules, declared in an agent manifest or llms.txt.
 - **0.2**: The same seven rules, plus the machine-readable fair-offer block in the x402 402 and the buyer's Accept-Proof header.
+- **0.3**: Eight rules: FO-8, the same offer to every buyer (`one_offer` in the block, `one_offer=checked` in Accept-Proof); the pledge-ledger schema for FO-7; and the platform annex, six rules for directories that list sellers. 0.2 blocks stay valid.
 
 ## License
 

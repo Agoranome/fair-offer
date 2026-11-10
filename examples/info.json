@@ -1,5 +1,5 @@
 {
-  "version": "0.2",
+  "version": "0.3",
   "standard": "https://agoranome.com/standard",
   "settlement": {
     "failed_calls": "not_charged",
@@ -14,6 +14,7 @@
   },
   "listing_price_matches_offer": true,
   "data_not_instructions": true,
+  "one_offer": true,
   "pledge": {
     "share": 0.15,
     "basis": "settled_revenue",
