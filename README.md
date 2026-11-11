@@ -151,8 +151,8 @@ be trusted. Free to adopt, like the rules above.
 [`skills/x402-pay-safely/SKILL.md`](skills/x402-pay-safely/SKILL.md) is an
 [Agent Skill](https://agentskills.io) for any agent with a wallet. It tells the
 agent when to check an x402 seller before paying it and how to prove a payment
-after, using Agoranome's paid Buyer check ($0.01 a call, up to 20 offers at once)
-and the free checks above. Skill installers that read a GitHub repository can
+after, using Agoranome's Buyer check (free since 11 November 2026, up to 20 offers
+at once, every answer signed) and the free checks above. Skill installers that read a GitHub repository can
 install it from here. The copy served at
 <https://api.agoranome.com/skills/x402-pay-safely/SKILL.md> is always current.
 

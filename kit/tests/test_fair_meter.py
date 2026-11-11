@@ -19,9 +19,10 @@ from pathlib import Path
 
 import pytest
 
-from fair_meter import declare, guard, jcs, ledger, meter, receipt
+from fair_meter import declare, guard, jcs, ledger, meter, pledge, receipt
 
 SCHEMA = Path(__file__).resolve().parents[2] / "schema" / "fair-offer-0.4.schema.json"
+PLEDGE_SCHEMA = SCHEMA.with_name("pledge-ledger-0.1.schema.json")
 KEY = "0x" + "11" * 32
 
 
@@ -167,3 +168,52 @@ def test_the_book_only_grows_and_every_receipt_folds_into_its_month():
     assert not ledger.verify_proof(ledger.leaf_hash({**nov_rows[0], "amount_atomic": 1}), book.proof("r-0")["proof"],
                                    view["months"][0]["merkle_root"])
     assert len(book.matches("0x" + "CD" * 20)) == 6
+
+
+# --- FO-7, the pledge ledger --------------------------------------------------------------------------------------
+
+def test_a_month_owes_its_share_rounded_up_and_small_sums_carry_inside_a_quarter():
+    assert pledge.owed(3000, 1500) == 450
+    assert pledge.owed(3001, 1500) == 451          # 450.15 rounds up: the cause never loses a fraction
+    assert pledge.owed(0, 1500) == 0
+    with pytest.raises(ValueError):
+        pledge.owed(100, 0)
+    months = [{"period": "2026-10", "owed_atomic": 300_000, "given_atomic": 0},      # $0.30, carried
+              {"period": "2026-11", "owed_atomic": 400_000, "given_atomic": 0},      # $0.70, carried
+              {"period": "2026-12", "owed_atomic": 100_000, "given_atomic": 0},      # $0.80 at the quarter's end: owed
+              {"period": "2027-01", "owed_atomic": 500_000, "given_atomic": 1_300_000},
+              {"period": "2027-02", "owed_atomic": 2_000_000, "given_atomic": 0}]
+    got = pledge.standing(reversed(months))
+    assert [m["standing"] for m in got] == ["carried", "carried", "owed", "kept", "owed"]
+    assert [m["balance_atomic"] for m in got] == ["300000", "700000", "800000", "0", "2000000"]
+    assert pledge.at_bar(40, 1500) == 47.06
+
+
+def test_the_pledge_page_validates_and_carries_the_receipts_ledgers_roots():
+    jsonschema = pytest.importorskip("jsonschema")
+    book = ledger.Ledger(":memory:")
+    for i, (when, amount) in enumerate([((2026, 11, 3), 4_000_000), ((2026, 11, 20), 6_000_000),
+                                        ((2026, 12, 2), 1_000_000)]):
+        book.record(f"r-{i}", payer="0x" + "ab" * 20, amount_atomic=amount, tx_hash="0x" + f"{i + 1:064x}",
+                    settled_at=datetime(*when, tzinfo=timezone.utc))
+    cause = "0x" + "C0" * 20
+    page = pledge.ledger_doc(book, share_bps=1500, proof_url="https://seller.example/receipts/{receipt_id}/proof",
+                             recipient=cause,
+                             transfers={"2026-11": [{"tx_hash": "0x" + "AA" * 32, "amount_atomic": 1_500_000}]})
+    jsonschema.validate(page, json.loads(PLEDGE_SCHEMA.read_text()))
+    roots = {m["period"]: m["merkle_root"] for m in book.view()["months"]}
+    assert {m["period"]: m["merkle_root"] for m in page["months"]} == roots
+    nov, dec = page["months"]
+    assert (nov["basis_atomic"], nov["owed_atomic"], nov["given_atomic"], nov["standing"]) == (
+        "10000000", "1500000", "1500000", "kept")
+    assert nov["donations"] == ["0x" + "aa" * 32] and nov["recipient"] == cause.lower()
+    assert (dec["owed_atomic"], dec["standing"]) == ("150000", "owed")    # December ends a quarter: nothing carried
+    assert pledge.kept(nov, 1_500_000) and not pledge.kept(nov, 1_499_999)
+    assert page["small_sums"] == "carry-1" and page["terms"]["share"] == 0.15
+    with pytest.raises(ValueError):
+        pledge.ledger_doc(book, share_bps=1500, proof_url="https://seller.example/proof")
+    with pytest.raises(ValueError):
+        pledge.ledger_doc(book, share_bps=1500, proof_url="https://s.example/{receipt_id}", recipient="cause")
+    unnamed = pledge.ledger_doc(book, share_bps=1500, proof_url="https://s.example/{receipt_id}")
+    jsonschema.validate(unnamed, json.loads(PLEDGE_SCHEMA.read_text()))
+    assert unnamed["terms"]["recipient"] is None
