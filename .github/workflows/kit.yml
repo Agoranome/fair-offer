@@ -1,0 +1,26 @@
+# Tests the fair-meter kit (kit/) on every change to it.
+name: Kit tests
+
+on:
+  push:
+    paths: ["kit/**", "schema/**", ".github/workflows/kit.yml"]
+  pull_request:
+    paths: ["kit/**", "schema/**", ".github/workflows/kit.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        working-directory: kit
+        run: pip install -e ".[test]"
+      - name: Test
+        working-directory: kit
+        run: pytest -q

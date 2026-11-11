@@ -1,5 +1,5 @@
 {
-  "version": "0.3",
+  "version": "0.4",
   "standard": "https://agoranome.com/standard",
   "settlement": {
     "failed_calls": "not_charged",
@@ -7,7 +7,8 @@
   },
   "receipts": {
     "signed": true,
-    "verify": "https://api.example.com/receipts/verify"
+    "verify": "https://api.example.com/receipts/verify",
+    "delivery_hash": "sha256-jcs"
   },
   "sample": {
     "url": "https://api.example.com/v1/search/sample"
@@ -15,9 +16,18 @@
   "listing_price_matches_offer": true,
   "data_not_instructions": true,
   "one_offer": true,
+  "metered": {
+    "unit": "row",
+    "unit_price_usd": "0.0002",
+    "scheme": "upto"
+  },
   "pledge": {
     "share": 0.15,
     "basis": "settled_revenue",
     "ledger": "https://api.example.com/impact/ledger"
+  },
+  "book": {
+    "ledger": "https://api.example.com/impact/ledger",
+    "reports": "https://api.example.com/reports.json"
   }
 }
