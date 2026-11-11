@@ -140,6 +140,10 @@ be trusted. Free to adopt, like the rules above.
   sends the block, and the hosted MCP server (`https://api.agoranome.com/mcp`, listed in
   the official MCP Registry) offers a `check_offer` tool. That service's source isn't
   public; this repository holds the open standard.
+- **fair-meter** ([`kit/`](kit/README.md), Apache-2.0): a small Python package for sellers that
+  builds the 0.4 block, meters a charge under the buyer's `upto` ceiling, signs receipts
+  bound to the delivery hash, guards responses against instructions (FO-6) and keeps a
+  receipts ledger with monthly Merkle roots that Agoranome's inspector can anchor.
 - Using it in your 402s? Open an issue with your host and it can be listed here.
 
 ## Agent skill for buyers
@@ -167,6 +171,7 @@ questions and replication requests can also go to research@agoranome.com.
 
 ## License
 
+The code in `kit/` is licensed under Apache-2.0 (`kit/LICENSE`).
 The standard text, schema, examples and the buyer skill are licensed under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Implement it freely;
 credit "The Fair Offer Standard, Agoranome".
