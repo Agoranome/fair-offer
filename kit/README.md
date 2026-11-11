@@ -10,6 +10,7 @@ package with no required dependencies:
 | `fair_meter.receipt` | FO-3 | A receipt bound to the SHA-256 of the RFC 8785 form of the result, signed with an EVM key (EIP-191). |
 | `fair_meter.guard` | FO-6 | Finds text that reads as an instruction to the buying agent in any string of a response, however it is hidden. |
 | `fair_meter.ledger` | FO-10 | A receipts ledger that only grows, one Merkle root a month, a proof per receipt. |
+| `fair_meter.pledge` | FO-7 | A public share paid once a month: the pledge ledger page (the standard's schema) from the receipts ledger, with each month's standing under the small-sums rule. |
 | `fair_meter.jcs` | | RFC 8785, the canonical JSON the delivery hash is taken over. |
 
 Signing receipts needs `eth-account`, which the x402 SDK already installs. Licence: Apache-2.0 (the standard's
@@ -75,6 +76,18 @@ tx_hash=...)`, and serve `book.view()` at your ledger path and `book.proof(recei
 that charged nothing has no transaction and stays out of the book.
 
 Read the field names on `requirements` from your SDK version; the shape above is the 2.25 Python SDK's.
+
+## A public share (FO-7)
+
+If you promise a share of what you earn to a cause, publish the pledge ledger beside the receipts ledger:
+
+    from fair_meter import pledge
+    page = pledge.ledger_doc(book, share_bps=1500, proof_url="https://you.example/receipts/{receipt_id}/proof",
+                             recipient=CAUSE, transfers={"2026-11": [{"tx_hash": "0x...", "amount_atomic": 300000}]})
+
+Each month shows its root, its basis, what it owes (the share, rounded up), what was sent and its standing: a month
+that owes under $1 carries over and shows as owed, and nothing is carried past the end of a quarter (`carry-1`).
+Send one USDC transfer on Base to the recipient each month; anyone can read it on the chain.
 
 ## What a buyer checks
 

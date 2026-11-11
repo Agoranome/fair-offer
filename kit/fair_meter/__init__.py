@@ -19,10 +19,12 @@
 - `receipt`: FO-3, a signed receipt bound to the hash of what was delivered.
 - `guard`: FO-6, a check that a response carries no instructions aimed at the buying agent.
 - `ledger`: FO-10, a receipts ledger that only grows, with monthly Merkle roots and a proof per receipt.
+- `pledge`: FO-7, a public share paid monthly: the pledge ledger page from the receipts ledger, and the carry-1 rule
+  for small sums.
 - `jcs`: RFC 8785, the canonical form the delivery hash is taken over.
 
 No dependencies beyond the standard library; signing receipts uses `eth-account`.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 STANDARD_VERSION = "0.4"
