@@ -1,9 +1,9 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.Agoranome/agoranome",
-  "title": "Agoranome seller tools",
-  "description": "Get your x402 API found and bought: lint, Bazaar rank, buyer panel, demand gaps. Paid in USDC.",
-  "version": "1.0.3",
+  "title": "Agoranome buyer checks and market data",
+  "description": "Free tools for agents that pay with x402: the fair pick, a check before paying, buyers' reports.",
+  "version": "1.0.4",
   "websiteUrl": "https://agoranome.com/mcp",
   "remotes": [
     {
