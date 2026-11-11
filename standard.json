@@ -1,15 +1,16 @@
 {
   "name": "Fair Offer Standard",
-  "version": "0.3",
+  "version": "0.4",
   "status": "draft",
   "url": "https://agoranome.com/standard",
   "publisher": "Agoranome",
   "summary": "Open rules for selling to AI agents honestly over x402. Free to adopt; no fee, no certification body.",
-  "how_to_declare": "Put the fair-offer block in your 402's extensions (see handshake), and link this URL from your llms.txt or agent manifest as \"conforms_to\": {\"fair_offer\": \"0.3\"}.",
+  "how_to_declare": "Put the fair-offer block in your 402's extensions (see handshake), and link this URL from your llms.txt or agent manifest as \"conforms_to\": {\"fair_offer\": \"0.4\"}.",
   "versions": {
     "0.1": "The seven rules, declared in an agent manifest or llms.txt.",
     "0.2": "The same seven rules, plus the machine-readable fair-offer block in the x402 402 and the buyer's Accept-Proof header.",
-    "0.3": "Eight rules: FO-8, the same offer to every buyer, declared as one_offer in the block and asked for with Accept-Proof one_offer=checked; the pledge-ledger schema FO-7's ledgers can follow; and the platform annex, six rules for directories that list sellers. 0.2 blocks stay valid."
+    "0.3": "Eight rules: FO-8, the same offer to every buyer, declared as one_offer in the block and asked for with Accept-Proof one_offer=checked; the pledge-ledger schema FO-7's ledgers can follow; and the platform annex, six rules for directories that list sellers. 0.2 blocks stay valid.",
+    "0.4": "Ten rules: FO-3's receipts bound to a hash of what was delivered (receipts.delivery_hash), FO-9, the price follows what was measured under the buyer's ceiling (metered, x402's upto), and FO-10, the book is open (book: the receipts ledger and buyers' reports); Accept-Proof receipts=bound, metered=ceiling, book=open and reports=open; and P-7 in the platform annex, marks earned by public check and never sold. 0.2 and 0.3 blocks stay valid."
   },
   "rules": [
     {
@@ -27,7 +28,7 @@
     {
       "id": "FO-3",
       "name": "Receipts are signed",
-      "rule": "Every paid result carries a receipt signed by the seller's key: what was bought, for how much, and when.",
+      "rule": "Every paid result carries a receipt signed by the seller's key: what was bought, for how much, and when, and (0.4) the SHA-256 of the RFC 8785 form of the result it came with, so a receipt is bound to what was delivered.",
       "check": "https://agoranome.com/verify"
     },
     {
@@ -59,6 +60,18 @@
       "name": "Same offer to every buyer",
       "rule": "Every buyer that asks at the same moment gets the same offer: the same price, asset, network and pay-to, whatever client, user agent or headers it sends. A price may change over time, never by who is asking.",
       "check": "https://api.agoranome.com/v1/fair-offer/check?url="
+    },
+    {
+      "id": "FO-9",
+      "name": "Price follows what was measured",
+      "rule": "A metered offer states its unit and one public unit price, the same at every size and for every buyer. The buyer signs a ceiling (x402's upto scheme), is charged only for what was delivered, never more than the ceiling, and nothing when nothing was delivered. The receipt names the charge and the ceiling.",
+      "check": "https://api.agoranome.com/v1/fair-offer/check?url="
+    },
+    {
+      "id": "FO-10",
+      "name": "The book is open",
+      "rule": "The seller's receipts are in a public ledger that only grows, with a proof per receipt, so a buyer can match its own payments against it and anyone can check it. Buyers' reports, each tied to a payment on the chain, are listed and never edited or quietly removed.",
+      "check": "https://api.agoranome.com/impact/ledger"
     }
   ],
   "annex": {
@@ -94,6 +107,11 @@
           "id": "P-6",
           "name": "Fresh listings",
           "rule": "Listings are kept fresh: a stale one is marked or dropped."
+        },
+        {
+          "id": "P-7",
+          "name": "Marks are earned, never sold",
+          "rule": "A badge, grade or mark shown beside a listing is computed from public checks by a published rule. It can't be bought, asked for or kept by paying."
         }
       ]
     }
@@ -104,10 +122,10 @@
   },
   "handshake": {
     "extension": "fair-offer",
-    "where": "PaymentRequired.extensions[\"fair-offer\"] = {\"info\": {...}, \"schema\": {\"$ref\": \"https://agoranome.com/standard/fair-offer-0.3.schema.json\"}}",
-    "schema": "https://agoranome.com/standard/fair-offer-0.3.schema.json",
+    "where": "PaymentRequired.extensions[\"fair-offer\"] = {\"info\": {...}, \"schema\": {\"$ref\": \"https://agoranome.com/standard/fair-offer-0.4.schema.json\"}}",
+    "schema": "https://agoranome.com/standard/fair-offer-0.4.schema.json",
     "example": {
-      "version": "0.3",
+      "version": "0.4",
       "standard": "https://agoranome.com/standard",
       "settlement": {
         "failed_calls": "not_charged",
@@ -115,7 +133,8 @@
       },
       "receipts": {
         "signed": true,
-        "verify": "https://api.example.com/receipts/verify"
+        "verify": "https://api.example.com/receipts/verify",
+        "delivery_hash": "sha256-jcs"
       },
       "sample": {
         "url": "https://api.example.com/v1/search/sample"
@@ -123,10 +142,19 @@
       "listing_price_matches_offer": true,
       "data_not_instructions": true,
       "one_offer": true,
+      "metered": {
+        "unit": "row",
+        "unit_price_usd": "0.0002",
+        "scheme": "upto"
+      },
       "pledge": {
         "share": 0.15,
         "basis": "settled_revenue",
         "ledger": "https://api.example.com/impact/ledger"
+      },
+      "book": {
+        "ledger": "https://api.example.com/impact/ledger",
+        "reports": "https://api.example.com/reports.json"
       }
     },
     "stable": "Keep the info identical in the unpaid 402 and on the paid retry: x402 clients echo it, and servers reject a payment whose echo drops or changes a field. Put live numbers behind a URL, never in the block.",
@@ -146,7 +174,11 @@
         "payers_30d>=N": "at least N distinct payers in 30 days (Bazaar's count)",
         "calls_30d>=N": "at least N paid calls in 30 days (Bazaar's count)",
         "deliveries_30d>=N": "at least N deliveries in 30 days: receipts confirmed on chain, paid by buyers (evidence commons)",
-        "one_offer=checked": "declared one_offer, and the offer read under two x402 client profiles seconds apart was the same, with no difference confirmed in 30 days (0.3)"
+        "one_offer=checked": "declared one_offer, and the offer read under two x402 client profiles seconds apart was the same, with no difference confirmed in 30 days (0.3)",
+        "receipts=bound": "each receipt names the SHA-256 of the result it came with (0.4)",
+        "metered=ceiling": "a metered offer that lists x402's upto, so the buyer signs a ceiling and pays for what was delivered (0.4)",
+        "book=open": "the receipts ledger the block names answers (0.4)",
+        "reports=open": "the block names where buyers' reports, each tied to a payment, are listed, and it answers (0.4)"
       },
       "answer": "The 402 carries Proof-Match: met, or unmet; missing=\"...\". A buyer may also add accept_proof to the block it echoes in its payment."
     },
