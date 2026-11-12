@@ -18,10 +18,10 @@ text, schema and examples in the rest of this repository are CC BY 4.0).
 
 ## Install
 
-From this repository until it is published:
+From PyPI (since 11 November 2026):
 
 ```
-pip install "git+https://github.com/Agoranome/fair-offer.git#subdirectory=kit"
+pip install fair-meter
 ```
 
 ## A metered route with the x402 SDK (Python, 2.25)
