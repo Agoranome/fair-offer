@@ -1,0 +1,15 @@
+name: fair_offer_market_weak_ledger
+description: The same market with the payments layer left at ledger.v1. The run FAILS on purpose - every offer above its listing and every payment to another pay-to settles, as it would for a client that trusts each 402.
+seed: 42
+validator: fair_offer_market
+plugin_files: [../fairoffer_plugin.py]
+layers:
+  payments: ledger.v1
+agents:
+  - name: bazaar
+    role: x402_market
+    config: {sheet: x402-2026-11-11, judged: 5491, asked_more: 459, at_least_double: 113, at_least_ten_times: 27, other_pay_to: 158, scale: 0.1, price_cents: 2, balance_cents: 0}
+  - name: buyer
+    role: x402_client
+    config: {balance_cents: 20000, requests_each: 1, gap: 0.05}
+max_time: 120

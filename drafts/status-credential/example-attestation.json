@@ -1,0 +1,6 @@
+{
+  "type": "AgoranomeSellerStatus",
+  "uri": "https://agoranome.com/v1/status/credentials/6830830403cf1189f166e5e54a177562",
+  "mediaType": "application/json",
+  "digest": "sha256:d8996fa01a782b8f284dbddf35a81fc103d26bfdf1b57a9258c4dcc247364c5e"
+}

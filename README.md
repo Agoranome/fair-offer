@@ -156,6 +156,17 @@ at once, every answer signed) and the free checks above. Skill installers that r
 install it from here. The copy served at
 <https://api.agoranome.com/skills/x402-pay-safely/SKILL.md> is always current.
 
+## In NANDA's town
+
+[`nandatown/`](nandatown/) is a payments plugin for [NandaTown](https://github.com/projnanda/nandatown), the NANDA
+sandbox: `fairoffer.v1` settles an x402 payment only on its listing's terms (pay-to, asset, network, at most the
+listed price, once per request), and records each judgment as a NandaTown evidence record. It ships Agoranome's
+buyer drill (a correct offer and eight traps) and a market built from the inspector's signed 11 November 2026
+sheet as free scenarios, each with a negative control that fails on purpose on NandaTown's default ledger.
+[`drafts/status-credential/`](drafts/status-credential/) is a draft seller status credential for the NANDA trust
+and identity working group, and [`proposals/`](proposals/) holds a draft proposal for an outside observer of agent
+payments. Neither is part of the standard.
+
 ## Proposing changes
 
 Open an issue or a pull request. Changes to the block's fields go into a new
@@ -171,7 +182,7 @@ questions and replication requests can also go to research@agoranome.com.
 
 ## License
 
-The code in `kit/` is licensed under Apache-2.0 (`kit/LICENSE`).
+The code in `kit/` and `nandatown/` is licensed under Apache-2.0 (`kit/LICENSE`, `nandatown/LICENSE`).
 The standard text, schema, examples and the buyer skill are licensed under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Implement it freely;
 credit "The Fair Offer Standard, Agoranome".

@@ -1,0 +1,15 @@
+name: fair_offer_market
+description: A tenth of the x402 offers the Agoranome inspector judged on price in its signed 11 November 2026 sheet - of 5,491 offers judged on price, 459 asked more than their listing (113 at least double, 27 at least ten times) and 158 named a pay-to the listing does not show - against a client that pays every offer. With fairoffer.v1 every honest offer is paid at its listed price and no offer settles above its listing or to another pay-to.
+seed: 42
+validator: fair_offer_market
+plugin_files: [../fairoffer_plugin.py]
+layers:
+  payments: fairoffer.v1
+agents:
+  - name: bazaar
+    role: x402_market
+    config: {sheet: x402-2026-11-11, judged: 5491, asked_more: 459, at_least_double: 113, at_least_ten_times: 27, other_pay_to: 158, scale: 0.1, price_cents: 2, balance_cents: 0}
+  - name: buyer
+    role: x402_client
+    config: {balance_cents: 20000, requests_each: 1, gap: 0.05}
+max_time: 120

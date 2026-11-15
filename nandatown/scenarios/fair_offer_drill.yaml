@@ -1,0 +1,21 @@
+name: fair_offer_drill
+description: Agoranome's buyer drill, free. Nine x402 sellers, one correct and eight traps (a price switch, a lookalike asset, a swapped pay-to, another chain, instructions in the paid body, a slow responder, a 200 claiming a settlement that never happened, an ambiguous error), against a client that falls for every one. The payments layer is fairoffer.v1, so the correct offer is paid at its listed price and no trap takes a cent it wasn't listed for.
+seed: 42
+validator: fair_offer_drill
+plugin_files: [../fairoffer_plugin.py]
+layers:
+  payments: fairoffer.v1
+agents:
+  - {name: control, role: x402_seller, config: {trap: control, price_cents: 1}}
+  - {name: price-switch, role: x402_seller, config: {trap: price_switch, price_cents: 1}}
+  - {name: lookalike-asset, role: x402_seller, config: {trap: lookalike_asset, price_cents: 1}}
+  - {name: pay-to-swap, role: x402_seller, config: {trap: pay_to_swap, price_cents: 1}}
+  - {name: network-switch, role: x402_seller, config: {trap: network_switch, price_cents: 1}}
+  - {name: instructions, role: x402_seller, config: {trap: instructions, price_cents: 1}}
+  - {name: slow-responder, role: x402_seller, config: {trap: slow_responder, price_cents: 1, max_timeout: 2.0}}
+  - {name: unsettled-200, role: x402_seller, config: {trap: unsettled_200, price_cents: 1}}
+  - {name: ambiguous-error, role: x402_seller, config: {trap: ambiguous_error, price_cents: 1}}
+  - name: buyer
+    role: x402_client
+    config: {balance_cents: 1000, requests_each: 2, retry_on_timeout: true, retry_on_error: true, follow_instructions: true}
+max_time: 60
