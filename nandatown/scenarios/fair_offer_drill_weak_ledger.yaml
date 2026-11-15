@@ -1,0 +1,21 @@
+name: fair_offer_drill_weak_ledger
+description: The same drill with the payments layer left at ledger.v1, which settles whatever a client pays. The run FAILS on purpose - the price switch, the lookalike asset, the swapped pay-to, the other chain, the instruction and both double payments settle, and the false settlement claim cannot be checked. Swap the layer, watch the buyer lose money.
+seed: 42
+validator: fair_offer_drill
+plugin_files: [../fairoffer_plugin.py]
+layers:
+  payments: ledger.v1
+agents:
+  - {name: control, role: x402_seller, config: {trap: control, price_cents: 1}}
+  - {name: price-switch, role: x402_seller, config: {trap: price_switch, price_cents: 1}}
+  - {name: lookalike-asset, role: x402_seller, config: {trap: lookalike_asset, price_cents: 1}}
+  - {name: pay-to-swap, role: x402_seller, config: {trap: pay_to_swap, price_cents: 1}}
+  - {name: network-switch, role: x402_seller, config: {trap: network_switch, price_cents: 1}}
+  - {name: instructions, role: x402_seller, config: {trap: instructions, price_cents: 1}}
+  - {name: slow-responder, role: x402_seller, config: {trap: slow_responder, price_cents: 1, max_timeout: 2.0}}
+  - {name: unsettled-200, role: x402_seller, config: {trap: unsettled_200, price_cents: 1}}
+  - {name: ambiguous-error, role: x402_seller, config: {trap: ambiguous_error, price_cents: 1}}
+  - name: buyer
+    role: x402_client
+    config: {balance_cents: 1000, requests_each: 2, retry_on_timeout: true, retry_on_error: true, follow_instructions: true}
+max_time: 60

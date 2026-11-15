@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Agoranome/fair-offer/blob/main/drafts/status-credential/seller-status-0.1.schema.json",
+  "title": "Seller status credential 0.1 (draft)",
+  "description": "A signed, short-lived statement of whether one x402 seller's live offer kept its listing when read without paying. W3C Verifiable Credentials 2.0 shaped; JWS signatures (RFC 7515) over the RFC 8785 form of the credential without its signatures.",
+  "type": "object",
+  "required": ["@context", "type", "id", "issuer", "validFrom", "validUntil", "credentialSubject", "signatures"],
+  "properties": {
+    "@context": {
+      "type": "array",
+      "minItems": 1,
+      "prefixItems": [{"const": "https://www.w3.org/ns/credentials/v2"}],
+      "items": {"type": "string"}
+    },
+    "type": {
+      "type": "array",
+      "allOf": [
+        {"contains": {"const": "VerifiableCredential"}},
+        {"contains": {"const": "AgoranomeSellerStatus"}}
+      ],
+      "items": {"type": "string"}
+    },
+    "id": {
+      "type": "string",
+      "description": "A URN that changes with the subject and the time issued. Its last segment is the credential id the URI and the ETag carry.",
+      "pattern": "^urn:[a-z0-9-]+:status:[0-9a-f]{32}$"
+    },
+    "issuer": {"type": "string", "format": "uri", "description": "The issuer's site; its JWKS is at /.well-known/jwks.json."},
+    "validFrom": {"type": "string", "format": "date-time"},
+    "validUntil": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The read's time plus the credential's life (24 hours by default). A credential is not to be relied on after it."
+    },
+    "credentialSubject": {"$ref": "#/$defs/subject"},
+    "termsOfUse": {
+      "type": "object",
+      "properties": {"licence": {"type": "string"}, "method": {"type": "string"}}
+    },
+    "signatures": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["protected", "signature"],
+        "properties": {
+          "protected": {"type": "string", "description": "base64url of the protected header: alg, jku, kid, typ."},
+          "signature": {"type": "string", "description": "base64url JWS signature over protected.base64url(RFC 8785 form without signatures)."}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "usd": {"type": ["string", "null"], "pattern": "^[0-9]+(\\.[0-9]+)?$", "description": "A decimal USD amount as text: no floating-point number is signed."},
+    "address": {"type": "string", "pattern": "^0x[0-9a-f]{40}$"},
+    "subject": {
+      "type": "object",
+      "required": ["id", "host", "rule", "status", "findings", "read_at", "listing", "asked", "ofac", "status_id", "status_since"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^dns:"},
+        "host": {"type": "string"},
+        "rule": {"const": "status-1"},
+        "status": {
+          "enum": ["sanctioned_pay_to", "no_answer", "asked_more", "other_pay_to", "not_judged", "as_listed"],
+          "description": "The first of these, in this order, that holds."
+        },
+        "findings": {
+          "type": "array",
+          "items": {"enum": ["sanctioned_pay_to", "no_answer", "asked_more", "other_pay_to", "not_judged"]},
+          "description": "Every finding that holds, the status among them (empty when the status is as_listed)."
+        },
+        "read_at": {"type": "string", "format": "date-time", "description": "When the seller's listing was read, without paying."},
+        "listing": {
+          "type": "object",
+          "required": ["resource", "price_usd", "pay_to"],
+          "properties": {
+            "resource": {"type": ["string", "null"]},
+            "price_usd": {"$ref": "#/$defs/usd"},
+            "pay_to": {"anyOf": [{"$ref": "#/$defs/address"}, {"type": "null"}]}
+          }
+        },
+        "asked": {
+          "type": "object",
+          "required": ["status", "price_usd", "pay_to", "networks"],
+          "properties": {
+            "status": {"type": ["integer", "null"], "description": "The HTTP status of the unpaid read."},
+            "price_usd": {"$ref": "#/$defs/usd"},
+            "pay_to": {"type": "array", "items": {"$ref": "#/$defs/address"}},
+            "networks": {"type": "array", "items": {"type": "string"}}
+          }
+        },
+        "ofac": {
+          "type": "object",
+          "required": ["checked", "list_read_at"],
+          "properties": {
+            "checked": {"type": "boolean"},
+            "list_read_at": {"type": ["string", "null"], "format": "date-time"}
+          }
+        },
+        "status_id": {"type": "string", "pattern": "^[0-9a-f]{24}$", "description": "Stays the same while the status and its findings stay the same."},
+        "status_since": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

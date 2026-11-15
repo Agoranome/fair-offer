@@ -1,0 +1,25 @@
+# Runs the Fair Offer NandaTown plugin (nandatown/) in NandaTown itself, at the commit its README names.
+name: NandaTown plugin tests
+
+on:
+  push:
+    paths: ["nandatown/**", ".github/workflows/nandatown.yml"]
+  pull_request:
+    paths: ["nandatown/**", ".github/workflows/nandatown.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install "nandatown @ git+https://github.com/projnanda/nandatown@6f9a7c064486c4a0ae9242f1ff341b8a4aad0244" pytest jsonschema
+      - name: Test
+        working-directory: nandatown
+        run: pytest -q tests

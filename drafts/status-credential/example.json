@@ -1,0 +1,52 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2"
+  ],
+  "type": [
+    "VerifiableCredential",
+    "AgoranomeSellerStatus"
+  ],
+  "id": "urn:agoranome:status:6830830403cf1189f166e5e54a177562",
+  "issuer": "https://agoranome.com",
+  "validFrom": "2026-11-16T10:00:00+00:00",
+  "validUntil": "2026-11-17T10:00:00+00:00",
+  "credentialSubject": {
+    "id": "dns:ok.example",
+    "host": "ok.example",
+    "rule": "status-1",
+    "status": "as_listed",
+    "findings": [],
+    "read_at": "2026-11-16T10:00:00+00:00",
+    "listing": {
+      "resource": "https://ok.example/v1/search",
+      "price_usd": "0.01",
+      "pay_to": "0x1111111111111111111111111111111111111111"
+    },
+    "asked": {
+      "status": 402,
+      "price_usd": "0.01",
+      "pay_to": [
+        "0x1111111111111111111111111111111111111111"
+      ],
+      "networks": [
+        "eip155:8453"
+      ]
+    },
+    "ofac": {
+      "checked": true,
+      "list_read_at": "2026-11-16T07:00:00+00:00"
+    },
+    "status_id": "ef1508f298eede91022f024d",
+    "status_since": "2026-11-16T10:00:00+00:00"
+  },
+  "termsOfUse": {
+    "licence": "Quote with credit to Agoranome (agoranome.com); not for republication in full. The signature proves the answer is ours: check it at /verify.",
+    "method": "Each seller's listing is its busiest on the newest weekly Bazaar snapshot (most payers, then most calls). It is read with one unpaid request, as a buyer agent would make it, at most once an hour whoever asks. The offer's lowest price and its pay-to addresses are compared with the listing's; the pay-to addresses of both are looked up in the OFAC SDN list the daily safety checks keep. The credential names the read's time and lasts 24 hours from it. No grade, payer count or model is read."
+  },
+  "signatures": [
+    {
+      "protected": "eyJhbGciOiJFZERTQSIsImprdSI6Imh0dHBzOi8vYWdvcmFub21lLmNvbS8ud2VsbC1rbm93bi9qd2tzLmpzb24iLCJraWQiOiI0ZFo3MVZydktvUW15Yi15OUd3cUMxNF8zdy1JVkVkS29MNlFhVktaMEZBIiwidHlwIjoiSk9TRSJ9",
+      "signature": "KXUE-5MpKYOpAsOcJROOhquWXNFhrRCTlC5Tt7c_ANt1PY-VXNRr6IOcDhxhbj7GfLz_kvSt2gQsFQEIMburDA"
+    }
+  ]
+}
