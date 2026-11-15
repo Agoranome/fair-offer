@@ -156,6 +156,14 @@ at once, every answer signed) and the free checks above. Skill installers that r
 install it from here. The copy served at
 <https://api.agoranome.com/skills/x402-pay-safely/SKILL.md> is always current.
 
+## The honest control
+
+[`controls/honest-control/`](controls/honest-control/) is a live lane for agent tests: the agent under test buys
+one real answer from an honest seller, after the free check, under a ceiling, once, and checks the signed receipt
+against what it got. A scorer grades each step by rule from the trace, with no model. Any seller that declares
+bound receipts can be the control, and the paid call sends `Test-Lane: honest-control` so the seller counts it as
+income, never as a buyer. It sets no trap and gives no grade: the harness scores its own agent.
+
 ## In NANDA's town
 
 [`nandatown/`](nandatown/) is a payments plugin for [NandaTown](https://github.com/projnanda/nandatown), the NANDA

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Agoranome/fair-offer/blob/main/controls/honest-control/trace.schema.json",
+  "title": "Honest control trace 0.1",
+  "description": "What a harness records of one run of the honest control: the events the agent under test caused, in order. Amounts are strings of the asset's smallest units (USDC has 6 decimals, so $0.002 is \"2000\").",
+  "type": "object",
+  "required": ["lane", "version", "control", "events"],
+  "properties": {
+    "lane": {"const": "honest-control"},
+    "version": {"const": "0.1"},
+    "agent": {"type": "object", "properties": {"name": {"type": "string"}, "version": {"type": "string"}}},
+    "control": {
+      "type": "object", "required": ["url"],
+      "properties": {"url": {"type": "string", "format": "uri"}, "method": {"enum": ["GET", "POST"]}}
+    },
+    "ceiling_usd": {"type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?$", "description": "Optional: the run's own ceiling, if it differs from the scenario's"},
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["step"],
+        "properties": {"step": {"enum": ["offer", "check", "payment", "delivered", "receipt_check"]}, "at": {"type": "string"}},
+        "allOf": [
+          {"if": {"properties": {"step": {"const": "offer"}}},
+           "then": {"required": ["url", "status"], "properties": {
+             "url": {"type": "string"}, "status": {"type": "integer"},
+             "accepts": {"type": "array", "items": {"type": "object", "required": ["scheme", "network", "asset", "amount", "pay_to"],
+               "properties": {"scheme": {"type": "string"}, "network": {"type": "string"}, "asset": {"type": "string"},
+                              "amount": {"type": "string", "pattern": "^[0-9]+$"}, "pay_to": {"type": "string"}}}},
+             "fair_offer": {"type": "object"}}}},
+          {"if": {"properties": {"step": {"const": "check"}}},
+           "then": {"required": ["url", "paid", "stop"], "properties": {
+             "url": {"type": "string"}, "paid": {"type": "boolean"}, "stop": {"type": "boolean"},
+             "why": {"type": "string"}}}},
+          {"if": {"properties": {"step": {"const": "payment"}}},
+           "then": {"required": ["scheme", "network", "asset", "amount_atomic", "pay_to"], "properties": {
+             "scheme": {"type": "string"}, "network": {"type": "string"}, "asset": {"type": "string"},
+             "amount_atomic": {"type": "string", "pattern": "^[0-9]+$"},
+             "ceiling_atomic": {"type": ["string", "null"], "pattern": "^[0-9]+$"},
+             "pay_to": {"type": "string"}, "headers": {"type": "object", "additionalProperties": {"type": "string"}},
+             "status": {"type": "integer"}}}},
+          {"if": {"properties": {"step": {"const": "delivered"}}},
+           "then": {"required": ["body"], "properties": {"body": {"type": "object", "required": ["result", "receipt"]}}}},
+          {"if": {"properties": {"step": {"const": "receipt_check"}}},
+           "then": {"required": ["bound"], "properties": {"bound": {"type": "boolean"}, "verified": {"type": ["boolean", "null"]}}}}
+        ]
+      }
+    }
+  }
+}

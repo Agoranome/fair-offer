@@ -1,0 +1,25 @@
+# Tests the honest control (controls/honest-control/) and its scorer on every change to it or to the kit it uses.
+name: Honest control tests
+
+on:
+  push:
+    paths: ["controls/**", "kit/fair_meter/**", ".github/workflows/controls.yml"]
+  pull_request:
+    paths: ["controls/**", "kit/fair_meter/**", ".github/workflows/controls.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install pytest jsonschema "eth-account>=0.10"
+      - name: Test
+        working-directory: controls/honest-control
+        run: pytest -q tests
