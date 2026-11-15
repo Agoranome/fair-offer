@@ -1,0 +1,102 @@
+{
+  "lane": "honest-control",
+  "version": "0.1",
+  "agent": {
+    "name": "example-agent",
+    "version": "1.0"
+  },
+  "control": {
+    "url": "https://api.agoranome.com/v1/facts/survival?category=web_search&price=0.01&method=GET",
+    "method": "GET"
+  },
+  "events": [
+    {
+      "step": "offer",
+      "at": "2026-11-16T10:00:00Z",
+      "url": "https://api.agoranome.com/v1/facts/survival?category=web_search&price=0.01&method=GET",
+      "status": 402,
+      "accepts": [
+        {
+          "scheme": "exact",
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "amount": "2000",
+          "pay_to": "0x0000000000000000000000000000000000000001"
+        }
+      ],
+      "fair_offer": {
+        "version": "0.4",
+        "receipts": {
+          "signed": true,
+          "delivery_hash": "sha256-jcs"
+        },
+        "listing_price_matches_offer": true
+      }
+    },
+    {
+      "step": "payment",
+      "at": "2026-11-16T10:00:02Z",
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "amount_atomic": "2000",
+      "ceiling_atomic": null,
+      "pay_to": "0x0000000000000000000000000000000000000001",
+      "headers": {},
+      "status": 504
+    },
+    {
+      "step": "payment",
+      "at": "2026-11-16T10:00:05Z",
+      "scheme": "exact",
+      "network": "eip155:8453",
+      "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+      "amount_atomic": "2000",
+      "ceiling_atomic": null,
+      "pay_to": "0x0000000000000000000000000000000000000001",
+      "headers": {
+        "Test-Lane": "honest-control"
+      },
+      "status": 200
+    },
+    {
+      "step": "delivered",
+      "at": "2026-11-16T10:00:03Z",
+      "body": {
+        "result": {
+          "example": "An example of the answer's shape: its numbers are made up, not data.",
+          "fact": "survival_odds",
+          "question": "Do new Web search listings priced $0.005 to $0.02 (GET) survive 4 weeks?",
+          "value": 0.642,
+          "unit": "share",
+          "range95": [
+            0.469,
+            0.785
+          ],
+          "n": 31,
+          "as_of": "2026-W45"
+        },
+        "receipt": {
+          "receipt_id": "0xabababababababababababababababababababababababababababababababab",
+          "payer": "0x00000000000000000000000000000000000000c1",
+          "pay_to": "0x0000000000000000000000000000000000000001",
+          "network": "eip155:8453",
+          "asset": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+          "amount_atomic": "2000",
+          "resource": "https://api.agoranome.com/v1/facts/survival",
+          "issued_at": "2026-11-16T10:00:03+00:00",
+          "status": "authorized; final once the facilitator settles it on-chain",
+          "delivery": {
+            "sha256": "0x3460400114d5f727321e138e5cd2a8721d95f5980a58afecac2fa583eb8ecba3",
+            "of": "the RFC 8785 (JCS) form of result"
+          }
+        },
+        "provenance": {
+          "scheme": "erc8004",
+          "content_hash": "<sha256 of the body>",
+          "signature": "<hex>"
+        }
+      }
+    }
+  ]
+}
