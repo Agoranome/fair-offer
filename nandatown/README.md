@@ -122,7 +122,14 @@ On the stub, 20 runs each (16 November 2026):
 | honest | passed every stage, 20/20 | failed at `protocol_invocation`, 20/20 |
 | each of the five defects | failed at the stage named for it and no other, 20/20 per defect (95% CI 83 to 100%) | the same as honest, 20/20: told apart from honest 0/20 per defect (95% CI 0 to 17%) |
 
-NandaTown's events held nothing of the offer in any of its 160 runs, adapter controls included.
+NandaTown's events held nothing of the offer in any of its 160 runs, adapter controls included. The first CI run
+gave the same verdict and first failed stage in every stub group.
+
+That run also failed Agoranome's own `price_position` skill, 20/20, at pay-to, network and asset. Its offer named
+USDC on Base and USDC on Solana, while its card listed Base alone, so a buyer checking the offer against the card
+couldn't tell the Solana option from a swapped pay-to. Price and repeat passed 20/20. Agoranome's fix lists every
+option under `accepts`; the weekly run shows whether it holds. NandaTown's test failed Agoranome at
+`protocol_invocation`, 20/20, as it fails any paid agent that asks to be paid first.
 
 ### Limits
 
