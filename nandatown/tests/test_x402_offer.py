@@ -145,7 +145,7 @@ def test_credentials_in_the_url_never_reach_the_bundle(tmp_path):
         assert "hunter2" not in Path(directory, name).read_text(), name
 
 
-# --- Offers in other forms ---------------------------------------------------------------------------------------------
+# --- Offers in other forms --------------------------------------------------------------------------------------------
 
 def test_one_unit_over_the_listed_price_fails_and_under_passes():
     def ask(amount):
@@ -220,6 +220,24 @@ def test_the_same_option_passes_once_the_card_lists_it():
 
     _, result = _check(ListsSolana(_with_solana))
     assert result["verdict"] == "passed"
+
+
+def test_the_same_option_passes_once_listed_under_accepts():
+    """The form Agoranome's card takes after E1: every option under accepts, assets as addresses, while networks,
+    assets and payTo still name the first option."""
+    class ListsAccepts(_Seller):
+        def card(self):
+            card = super().card()
+            for ext in card["capabilities"]["extensions"]:
+                ext["params"]["accepts"] = [
+                    {"scheme": "exact", "network": stub.NETWORK, "asset": xo.USDC[stub.NETWORK], "payTo": stub.PAY_TO},
+                    {"scheme": "exact", "network": SOLANA, "asset": xo.USDC[SOLANA], "payTo": SOLANA_PAY_TO}]
+            return card
+
+    _, result = _check(ListsAccepts(_with_solana))
+    assert result["verdict"] == "passed"
+    listed = next(s["note"] for s in result["stages"] if s["name"] == "listing_retrieval")
+    assert SOLANA in listed
 
 
 # --- Agents that don't ask, or don't answer -----------------------------------------------------------------------
