@@ -1,0 +1,62 @@
+# E1 of the Nanda Town experiment plan: the x402-offer check (nandatown/x402_offer.py) and NandaTown's own agent test,
+# each run 20 times against the stub seller (honest, and with each of five planted defects) and against Agoranome's
+# paid A2A skill. Nothing is signed or paid. The stub results gate the job; NandaTown's verdicts and Agoranome's are
+# measured and reported, never gated. Weekly, so the result is replicated rather than announced once.
+name: E1 x402-offer
+
+on:
+  pull_request:
+    paths: ["nandatown/x402_offer.py", "nandatown/x402_stub.py", "nandatown/town_adapter.py", "nandatown/e1.py",
+            ".github/workflows/e1.yml"]
+  push:
+    branches: [main]
+    paths: ["nandatown/x402_offer.py", "nandatown/x402_stub.py", "nandatown/town_adapter.py", "nandatown/e1.py",
+            ".github/workflows/e1.yml"]
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      repeats:
+        description: "Runs per group"
+        default: "20"
+        required: false
+      skill:
+        description: "Agoranome's paid skill to ask for"
+        default: "price_position"
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e1-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  e1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install NandaTown at the commit the plugin is tested at
+        run: pip install "nandatown @ git+https://github.com/projnanda/nandatown@6f9a7c064486c4a0ae9242f1ff341b8a4aad0244" httpx
+      - name: Run E1
+        working-directory: nandatown
+        env:
+          REPEATS: ${{ inputs.repeats || '20' }}
+          SKILL: ${{ inputs.skill || 'price_position' }}
+        run: python e1.py --repeats "$REPEATS" --agoranome https://api.agoranome.com --skill "$SKILL" --out e1-out --emit
+      - name: Summary
+        if: always()
+        working-directory: nandatown
+        run: if [ -f e1-out/summary.md ]; then cat e1-out/summary.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: Keep every bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e1-${{ github.run_id }}
+          path: nandatown/e1-out
+          retention-days: 90
