@@ -170,7 +170,11 @@ income, never as a buyer. It sets no trap and gives no grade: the harness scores
 sandbox: `fairoffer.v1` settles an x402 payment only on its listing's terms (pay-to, asset, network, at most the
 listed price, once per request), and records each judgment as a NandaTown evidence record. It ships Agoranome's
 buyer drill (a correct offer and eight traps) and a market built from the inspector's signed 11 November 2026
-sheet as free scenarios, each with a negative control that fails on purpose on NandaTown's default ledger.
+sheet as free scenarios, each with a negative control that fails on purpose on NandaTown's default ledger. Beside
+it, [`x402-offer`](nandatown/README.md#x402-offer-a-test-for-paid-a2a-agents) tests a running paid A2A agent: it asks
+one paid skill twice without paying, passes only when the offer keeps the listing's price, pay-to, network and asset
+and the same terms on the repeat, and keeps the run as a NandaTown evidence bundle. NandaTown's own agent test needs a
+completed task, so it scores an honest paid agent and a dishonest one alike.
 [`drafts/status-credential/`](drafts/status-credential/) is a draft seller status credential for the NANDA trust
 and identity working group, and [`proposals/`](proposals/) holds a draft proposal for an outside observer of agent
 payments. Neither is part of the standard.

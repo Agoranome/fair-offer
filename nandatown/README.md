@@ -3,7 +3,9 @@
 A payments plugin for [NandaTown](https://github.com/projnanda/nandatown), the NANDA sandbox, that settles an x402
 payment only on the terms its listing states, with the scenarios that show what it stops. One file,
 [`fairoffer_plugin.py`](fairoffer_plugin.py), Apache 2.0. Tested against NandaTown at
-[`6f9a7c0`](https://github.com/projnanda/nandatown/commit/6f9a7c0) (4 November 2026).
+[`6f9a7c0`](https://github.com/projnanda/nandatown/commit/6f9a7c0) (4 November 2026). Beside it,
+[x402-offer](#x402-offer-a-test-for-paid-a2a-agents) tests a running paid A2A agent's offer, in NandaTown's evidence
+format.
 
 | Registers | Id | What it does |
 |---|---|---|
@@ -71,3 +73,68 @@ amounts. An escrow hold names no payee or quantity, so a release is checked for 
 price. Two traps are the client's to catch, not the ledger's: the plugin can't stop a client believing a false
 settlement claim, only answer `settlement(request)`, and it stops the payment an instruction asks for, not the
 client reading it.
+
+## x402-offer: a test for paid A2A agents
+
+NandaTown's agent test (`nandatown test-agent`, path profile `a2a-capability-fulfillment@0.3`) needs a completed
+task. A paid agent that follows the a2a-x402 extension stops an unpaid task in `input-required` with an offer, so the
+test scores it failed at `protocol_invocation`, and none of its stages reads the offer. [`x402_offer.py`](x402_offer.py)
+is that missing profile, `a2a-x402-offer@0.1`. It asks one paid skill twice without paying and passes only when:
+
+| Stage | Passes when |
+|---|---|
+| `x402_extension_declared` | the agent card declares the a2a-x402 extension |
+| `listing_retrieval` | the price, networks, assets and pay-tos are listed before any task: the card's x402 params and `<card url>/skills/<skill>` (or the skill's "Price: $"), or a [listing file](schemas/x402_offer_listing.schema.json) |
+| `payment_request` | the unpaid task stops in `input-required` with an x402 payment request |
+| `price_within_listing` | no option asks more than the listed price |
+| `pay_to_matches_listing` | every option pays a listed pay-to |
+| `network_matches_listing` | every option is on a listed network |
+| `asset_matches_listing` | every option is in a listed asset |
+| `repeat_same_terms` | the same request, asked again, gets the same terms |
+
+Nothing is signed or paid. The stages are worked out from the recorded events alone, and each run is kept as
+NandaTown's path bundle (profile, run, intents, events, result and manifest, with the same canonical JSON and
+SHA-256), with `report.md` and one NandaTown evidence record per stage in `evidence.json`.
+`python x402_offer.py verify BUNDLE` checks the hashes and replays the stages; `nandatown verify` checks the same
+hashes and bindings and reports only that it has no x402-offer evaluator to replay. It needs httpx only.
+
+```sh
+python x402_offer.py check --url https://api.agoranome.com --skill price_position
+python x402_offer.py verify runs/<run id>
+```
+
+[`x402_stub.py`](x402_stub.py) is a local seller with one paid skill, honest or with one of five planted defects,
+built as the seller-side twins of Agoranome's buyer drill: a price above the listing, a swapped pay-to, another
+network, a lookalike asset, and terms changed on a retry. Each changes one term, so the check names it by the stage
+that fails. [`town_adapter.py`](town_adapter.py) is the small adapter NandaTown's guide asks for, recorded beside
+each result, when an agent's JSON-RPC endpoint isn't its host's root or it picks a skill from the message, as
+Agoranome's does.
+
+[`e1.py`](e1.py) runs experiment E1: both tests, 20 times each, on every stub variant and on Agoranome's paid
+skill, with exact (Clopper-Pearson) 95% intervals. The [E1 workflow](../.github/workflows/e1.yml) runs it on every
+change, weekly and on demand, and keeps every bundle as a 90-day artifact. The stub results gate the job;
+NandaTown's verdicts and Agoranome's are measured, never gated.
+
+On the stub, 20 runs each (16 November 2026):
+
+| Variant | x402-offer | NandaTown's agent test |
+|---|---|---|
+| honest | passed every stage, 20/20 | failed at `protocol_invocation`, 20/20 |
+| each of the five defects | failed at the stage named for it and no other, 20/20 per defect (95% CI 83 to 100%) | the same as honest, 20/20: told apart from honest 0/20 per defect (95% CI 0 to 17%) |
+
+NandaTown's events held nothing of the offer in any of its 160 runs, adapter controls included. The first CI run
+gave the same verdict and first failed stage in every stub group.
+
+That run also failed Agoranome's own `price_position` skill, 20/20, at pay-to, network and asset. Its offer named
+USDC on Base and USDC on Solana, while its card listed Base alone, so a buyer checking the offer against the card
+couldn't tell the Solana option from a swapped pay-to. Price and repeat passed 20/20. Agoranome's fix lists every
+option under `accepts`; the weekly run shows whether it holds. NandaTown's test failed Agoranome at
+`protocol_invocation`, 20/20, as it fails any paid agent that asks to be paid first.
+
+### Limits
+
+The listing is what the agent publishes. The a2a-x402 extension defines no card params, so the check reads the
+form Agoranome's card uses (networks, assets and payTo, one address or one per network) or a list of options under
+`accepts`; an agent that lists its terms elsewhere needs a listing file. Prices are compared in the asset's smallest
+units, with USDC's address and decimals known on eleven networks; another asset needs its decimals in the listing.
+Two asks in one context are a repeat, not a market: an agent that quotes another buyer other terms passes here.
