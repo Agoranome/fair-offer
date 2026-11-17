@@ -20,44 +20,17 @@ to an agent in every string of a response, matched as a model reads it: characte
 compatibility forms folded, invisible characters dropped and look-alike letters made Latin. It is a set of fixed
 patterns, not a model: it misses what they don't cover and is meant as a guard, not a proof.
 
-The patterns are Agoranome's, from its listing checks and the red-team of its own defences (November 2026).
+The scanner is the Agoranome buyer guard's own (`fair_meter/instructions.py`, a byte-for-byte copy of
+agoranome_policy/instructions.py, ruleset instructions-2), so a seller checks its response the way the buyer's guard
+will read it. tests/test_instructions_copy.py fails when the copy is edited here and not upstream.
 """
 
-import html
-import re
-import unicodedata
 from typing import Any, List, Tuple
 
-PATTERNS = [
-    r"\bignore (all|any|the|your|previous|prior|other)\b",
-    r"\bdisregard\b",
-    r"\b(always|must|should|you should) (choose|pick|select|prefer|call|use) (this|us|me|our)\b",
-    r"\b(choose|pick|select|prefer) (this|us|me|our \w+) (over|instead|first|before)\b",
-    r"\bdo not (choose|pick|select|use|call) (any|other|another|competing)\b",
-    r"\bsystem prompt\b",
-    r"\byou are (an?|the) (ai|assistant|agent|model|llm)\b",
-    r"\b(attention|note to|dear) (ai|llm|agents?|assistants?|models?)\b",
-    r"<\s*/?\s*(system|instructions?|prompt)\s*>",
-    r"\[\s*/?\s*(system|inst)\s*\]",
-    r"\bforget (all |any |the |your )?(previous|prior|earlier|above|preceding|other) "
-    r"(instructions?|prompts?|rules?|messages?)\b",
-    r"\boverride (all |any |your )(previous |prior |other )?(instructions?|rules?|system prompt)\b",
-    r"\bnew instructions?\s*:",
-    r"<\|\s*(im_start|im_end|system|assistant|endoftext)\s*\|>",
-    r"\bthe only (tool|service|api|option|seller) (you|agents?|models?) (should|must|may) (call|use|pick|choose|"
-    r"select)\b",
-]
-_RE = re.compile("|".join(PATTERNS), re.IGNORECASE)
-_CONFUSABLES = str.maketrans({
-    "а": "a", "е": "e", "о": "o", "р": "p", "с": "c", "у": "y", "х": "x",
-    "і": "i", "ј": "j", "ѕ": "s", "ԁ": "d", "һ": "h", "А": "A", "В": "B",
-    "Е": "E", "К": "K", "М": "M", "Н": "H", "О": "O", "Р": "P", "С": "C",
-    "Т": "T", "Х": "X", "І": "I", "Ј": "J", "Ѕ": "S", "ο": "o", "Ο": "O",
-    "α": "a", "ι": "i", "Ι": "I", "ν": "v", "ρ": "p", "Α": "A", "Β": "B",
-    "Ε": "E", "Η": "H", "Κ": "K", "Μ": "M", "Ν": "N", "Τ": "T", "Χ": "X",
-    "Υ": "Y", "Ζ": "Z",
-})
-_SPACES = re.compile(r"\s+")
+from fair_meter.instructions import RULESET, SCANNER_PATTERNS, instruction_like, normalized
+
+PATTERNS = SCANNER_PATTERNS
+__all__ = ["InstructionFound", "PATTERNS", "RULESET", "guard", "normalized", "scan"]
 
 
 class InstructionFound(ValueError):
@@ -66,12 +39,6 @@ class InstructionFound(ValueError):
     def __init__(self, found: List[Tuple[str, str]]):
         self.found = found
         super().__init__("text that reads as an instruction to an agent at " + ", ".join(p for p, _ in found[:5]))
-
-
-def normalized(text: str) -> str:
-    text = unicodedata.normalize("NFKC", html.unescape(text or ""))
-    text = "".join(ch for ch in text if unicodedata.category(ch) != "Cf")
-    return _SPACES.sub(" ", text.translate(_CONFUSABLES))
 
 
 def _strings(value: Any, path: str):
@@ -88,7 +55,7 @@ def _strings(value: Any, path: str):
 
 def scan(value: Any) -> List[Tuple[str, str]]:
     """(where, phrase) for each instruction-like phrase in the strings of a JSON value, keys included."""
-    return [(where, m.group(0)) for where, text in _strings(value, "$") for m in _RE.finditer(normalized(text))]
+    return [(where, phrase) for where, text in _strings(value, "$") for phrase in instruction_like(text)]
 
 
 def guard(value: Any) -> Any:
