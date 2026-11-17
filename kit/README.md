@@ -98,6 +98,16 @@ Send one USDC transfer on Base to the recipient each month; anyone can read it o
   (`anchor-lab`) so a past month can't be changed quietly (`verify-receipt`).
 - `https://api.agoranome.com/v1/fair-offer/check?url=` reads your live 402 against your block, free.
 
+## Changes
+
+- **0.2.1** (not yet on PyPI): `fair_meter.guard` scans with a byte-for-byte copy of the Agoranome buyer guard's
+  scanner (ruleset `instructions-2`, pinned by its SHA-256), so a seller checks a response the way the buyer's guard
+  reads it: spaced letters, digits for letters, markdown role headers followed by an order, and orders in HTML
+  comments are found, and honest text such as "Ignore the fog warnings" is no longer refused. The rules table's
+  "how to check" links go to the free check. This change merged with the version still at 0.2.0, which PyPI
+  already held for the first scanner; 0.2.1 is the release that carries it.
+- **0.2.0** (11 November 2026): the pledge ledger (FO-7), and the Buyer check described as free.
+
 ## Tests
 
 ```
