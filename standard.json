@@ -17,7 +17,7 @@
       "id": "FO-1",
       "name": "Price before payment",
       "rule": "An unpaid call returns an x402 offer (HTTP 402) that states the price, asset, network and pay-to address. Nothing is charged before the buyer has signed that exact offer.",
-      "check": "https://api.agoranome.com/v1/seller/lint"
+      "check": "https://api.agoranome.com/v1/fair-offer/check?url="
     },
     {
       "id": "FO-2",
@@ -35,13 +35,13 @@
       "id": "FO-4",
       "name": "Sample before you buy",
       "rule": "A free sample shows what the paid route returns, and a third party can attest that the sample and the paid offer come from the same host.",
-      "check": "https://api.agoranome.com/v1/seller/attest"
+      "check": "https://api.agoranome.com/v1/fair-offer/check?url="
     },
     {
       "id": "FO-5",
       "name": "Honest listing",
       "rule": "The listing's description, input schema and output example match what the route really returns. Edits made to win buyers must stay true.",
-      "check": "https://api.agoranome.com/v1/seller/panel"
+      "check": "https://api.agoranome.com/v1/fair-offer/check?url="
     },
     {
       "id": "FO-6",

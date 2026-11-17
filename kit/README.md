@@ -8,7 +8,7 @@ package with no required dependencies:
 | `fair_meter.declare` | FO-2 to FO-10 | Builds the `fair-offer` block for your 402, refusing anything the 0.4 schema doesn't allow. |
 | `fair_meter.meter` | FO-9 | The charge under the buyer's ceiling with x402's `upto`: units times one public unit price, never more than the ceiling, nothing when nothing was delivered. |
 | `fair_meter.receipt` | FO-3 | A receipt bound to the SHA-256 of the RFC 8785 form of the result, signed with an EVM key (EIP-191). |
-| `fair_meter.guard` | FO-6 | Finds text that reads as an instruction to the buying agent in any string of a response, however it is hidden. |
+| `fair_meter.guard` | FO-6 | Finds text that reads as an instruction to the buying agent in any string of a response, with the Agoranome buyer guard's own scanner, so a seller checks a response the way the buyer's guard reads it. It reads hidden forms (invisible characters, look-alike letters, spaced letters, digits for letters) but is a set of patterns, not a proof: it caught 68 of 100 held-out planted instructions in the guard's labelled corpus. |
 | `fair_meter.ledger` | FO-10 | A receipts ledger that only grows, one Merkle root a month, a proof per receipt. |
 | `fair_meter.pledge` | FO-7 | A public share paid once a month: the pledge ledger page (the standard's schema) from the receipts ledger, with each month's standing under the small-sums rule. |
 | `fair_meter.jcs` | | RFC 8785, the canonical JSON the delivery hash is taken over. |
