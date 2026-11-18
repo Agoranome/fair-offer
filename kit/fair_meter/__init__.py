@@ -26,5 +26,5 @@
 No dependencies beyond the standard library; signing receipts uses `eth-account`.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 STANDARD_VERSION = "0.4"
